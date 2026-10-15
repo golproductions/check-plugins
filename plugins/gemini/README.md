@@ -1,6 +1,8 @@
 # Check for Gemini CLI
 
-Check verifies an AI's commands before they run. Before your AI runs a command or writes a file, your own machine checks it: does the program, file, folder, script, package or image it names exist, and does the code parse? When the machine proves the action wrong, Check stops it and tells the AI what the machine said, so it can fix it.
+Check verifies an AI's actions before they run. Your own machine checks them: does the program, file, folder, script, package or image an action names exist, and does the code parse? When the machine proves the action wrong, Check stops it and tells the AI what the machine said, so it can fix it.
+
+In Gemini CLI, Check checks file writes everywhere, and commands on Linux. (On Windows, Gemini CLI's commands aren't checked.)
 
 ## Install
 
@@ -14,7 +16,7 @@ A GOL API Key from https://golproductions.com/console (14 days free, no card). G
 
 ## What it runs
 
-- `check-hook.mjs`, the plugin's only code, runs on each command, file write and message. It is plain, readable JavaScript. It never downloads or replaces code: updates come as new versions of this plugin.
+- `check-hook.mjs`, the plugin's only code, runs before each action the tool lets it see, and on each message. It is plain, readable JavaScript. It never downloads or replaces code: updates come as new versions of this plugin.
 - It runs read-only checks on your machine: it looks up programs and paths, asks tools such as `git`, `node --check`, `bash -n`, `ruby -c`, `php -l`, `docker image inspect` and PowerShell's parser, and parses files your AI writes. It does not run your command.
 
 ## What it sends

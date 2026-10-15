@@ -1,6 +1,6 @@
 # Check plugins
 
-Check by GOLProductions: before your AI runs a command or writes a file, your own machine checks it, and what it proves wrong is stopped.
+Check by GOLProductions: before your AI acts, your own machine checks the action, and what it proves wrong is stopped. What each tool lets Check see is in its package's README and at https://golproductions.com/guide
 
 | Tool | Package |
 |---|---|

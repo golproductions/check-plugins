@@ -1,7 +1,7 @@
 {
   "name": "check",
   "version": "5.0.0",
-  "description": "Check: before your AI runs a command or writes a file, your own machine checks it.",
+  "description": "Check: before Gemini CLI writes a file (or, on Linux, runs a command), your own machine checks it.",
   "settings": [
     {
       "name": "GOL API Key",

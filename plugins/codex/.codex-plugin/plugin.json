@@ -1,7 +1,7 @@
 {
   "name": "check",
   "version": "5.0.0",
-  "description": "Check: before your AI runs a command or writes a file, your own machine checks it. Stops actions your machine proves wrong.",
+  "description": "Check: before Codex runs a command or adds a file, your own machine checks it. Stops actions your machine proves wrong.",
   "author": {
     "name": "GOLProductions",
     "url": "https://golproductions.com"
