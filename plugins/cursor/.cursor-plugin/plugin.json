@@ -7,5 +7,16 @@
     "url": "https://golproductions.com"
   },
   "homepage": "https://golproductions.com/check",
-  "hooks": "hooks/hooks.json"
+  "hooks": "hooks/hooks.json",
+  "displayName": "Check",
+  "repository": "https://github.com/golproductions/check-plugins",
+  "license": "SEE LICENSE IN https://golproductions.com/terms",
+  "keywords": [
+    "hooks",
+    "verification",
+    "shell",
+    "hallucination",
+    "safety"
+  ],
+  "logo": "assets/logo.png"
 }

@@ -1,0 +1,17 @@
+{
+  "name": "golproductions",
+  "owner": {
+    "name": "GOLProductions",
+    "email": "support@golproductions.com"
+  },
+  "metadata": {
+    "description": "Check by GOLProductions: your own machine checks your AI's commands before they run."
+  },
+  "plugins": [
+    {
+      "name": "check",
+      "source": "plugins/cursor",
+      "description": "Before Cursor runs a shell command, your own machine checks it. Stops commands your machine proves wrong."
+    }
+  ]
+}
