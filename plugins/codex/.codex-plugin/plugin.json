@@ -1,0 +1,12 @@
+{
+  "name": "check",
+  "version": "5.0.0",
+  "description": "Check: before your AI runs a command or writes a file, your own machine checks it. Stops actions your machine proves wrong.",
+  "author": {
+    "name": "GOLProductions",
+    "url": "https://golproductions.com"
+  },
+  "homepage": "https://golproductions.com/check",
+  "license": "SEE LICENSE IN https://golproductions.com/terms",
+  "hooks": "./hooks/hooks.json"
+}

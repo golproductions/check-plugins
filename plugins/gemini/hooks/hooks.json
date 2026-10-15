@@ -1,11 +1,29 @@
 {
   "hooks": {
     "BeforeTool": [
-      { "matcher": "run_shell_command|write_file|replace",
-        "hooks": [{ "type": "command", "command": "node \"${extensionPath}/run.mjs\"", "name": "check", "timeout": 60000 }] }
+      {
+        "matcher": "run_shell_command|write_file|replace",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${extensionPath}/check-hook.mjs\"",
+            "name": "check",
+            "timeout": 60000
+          }
+        ]
+      }
     ],
     "BeforeAgent": [
-      { "hooks": [{ "type": "command", "command": "node \"${extensionPath}/run.mjs\"", "name": "check", "timeout": 60000 }] }
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${extensionPath}/check-hook.mjs\"",
+            "name": "check",
+            "timeout": 60000
+          }
+        ]
+      }
     ]
   }
 }

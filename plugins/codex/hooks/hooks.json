@@ -3,11 +3,12 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Bash|PowerShell|Write|Edit|NotebookEdit|apply_patch",
+        "matcher": "Bash|apply_patch",
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/run.mjs\""
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/check-hook.mjs\"",
+            "timeout": 60
           }
         ]
       }
@@ -17,7 +18,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/run.mjs\""
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/check-hook.mjs\"",
+            "timeout": 60
           }
         ]
       }
@@ -27,18 +29,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/run.mjs\""
-          }
-        ]
-      }
-    ],
-    "PostToolUseFailure": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/run.mjs\""
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/check-hook.mjs\"",
+            "timeout": 60
           }
         ]
       }
