@@ -7,7 +7,7 @@
 //
 // It never blocks on its own failure: some hosts (Copilot) deny the action when
 // a hook crashes or exits non-zero, so any error here exits 0 (go ahead).
-import { existsSync, mkdirSync, writeFileSync, renameSync, unlinkSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync, renameSync, unlinkSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { createHash, createPublicKey, verify as cryptoVerify } from "node:crypto";
 import { homedir } from "node:os";
@@ -18,10 +18,10 @@ const home = process.env.CHECK_TEST_HOME || homedir();
 const dir = join(home, ".check");
 const gate = join(dir, "check-hook.mjs");
 
+// Claude Code: the key comes only from the plugin's own setting (entered at
+// install, kept in Claude Code's secure storage), never from the machine.
 function keyOf() {
-  const k = process.env.CLAUDE_PLUGIN_OPTION_GOL_API_KEY || process.env.GOL_API_KEY || process.env.GOL_CLIENT_ID || "";
-  if (k.trim()) return k.trim();
-  try { return readFileSync(join(dir, "key"), "utf8").trim(); } catch { return ""; }
+  return (process.env.CLAUDE_PLUGIN_OPTION_GOL_API_KEY || "").trim();
 }
 
 // The gate is signed off the server (Ed25519); this is the public half.
@@ -56,12 +56,9 @@ async function main() {
   let input = "";
   for await (const c of process.stdin) input += c;
   const key = keyOf();
-  if (!existsSync(gate)) {
-    if (!key) { say("add your GOL API Key to turn Check on (from https://golproductions.com/console). Until then, actions go ahead unchecked."); return 0; }
-    if (!(await fetchGate(key))) return 0;
-  }
-  const env = { ...process.env };
-  if (key) env.GOL_API_KEY = key;
+  if (!key) { say("add your GOL API Key in the plugin's settings to turn Check on (from https://golproductions.com/console). Until then, actions go ahead unchecked."); return 0; }
+  if (!existsSync(gate) && !(await fetchGate(key))) return 0;
+  const env = { ...process.env, GOL_API_KEY: key };
   const r = spawnSync(process.execPath, [gate], { input, env, encoding: "utf8", timeout: 90000, windowsHide: true, maxBuffer: 16 * 1024 * 1024 });
   if (process.env.CHECK_PLUGIN_TRACE) { try { const { appendFileSync } = await import("node:fs"); appendFileSync(process.env.CHECK_PLUGIN_TRACE, JSON.stringify({ input: input.slice(0, 600), status: r.status, stdout: String(r.stdout || "").slice(0, 400), stderr: String(r.stderr || "").slice(0, 300) }) + "\n"); } catch {} }
   if (r.error || r.status === null) return 0;
