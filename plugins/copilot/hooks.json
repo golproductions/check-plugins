@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      { "type": "command", "bash": "node \"${PLUGIN_ROOT}/run.mjs\"", "powershell": "node \"${PLUGIN_ROOT}/run.mjs\"", "timeoutSec": 60 }
+    ],
+    "userPromptSubmitted": [
+      { "type": "command", "bash": "node \"${PLUGIN_ROOT}/run.mjs\"", "powershell": "node \"${PLUGIN_ROOT}/run.mjs\"", "timeoutSec": 30 }
+    ]
+  }
+}

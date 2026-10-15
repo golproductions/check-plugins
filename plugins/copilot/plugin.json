@@ -1,0 +1,8 @@
+{
+  "name": "check",
+  "version": "4.4.0",
+  "description": "Check: before your AI runs a shell command, your own machine checks it. Stops commands your machine proves wrong.",
+  "author": { "name": "GOLProductions", "url": "https://golproductions.com" },
+  "homepage": "https://golproductions.com/check",
+  "hooks": "hooks.json"
+}
