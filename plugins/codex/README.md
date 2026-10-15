@@ -21,7 +21,7 @@ Any agent, without a plugin: `npx @golproductions/check@latest --install`. Packa
 
 ## What it needs
 
-A GOL API Key from https://golproductions.com/console (14 days free, no card). You enter it when you install the plugin; it is stored in Claude Code's secure storage and never shown to your AI.
+A GOL API Key from https://golproductions.com/console (14 days free, no card). Set it with npx @golproductions/check@latest --key, or as GOL_API_KEY.
 
 ## What it runs
 
