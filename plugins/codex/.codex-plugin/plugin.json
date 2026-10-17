@@ -1,6 +1,6 @@
 {
   "name": "check",
-  "version": "5.0.1",
+  "version": "5.0.2",
   "description": "Check: before Codex runs a command or adds a file, your own machine checks it. Stops actions your machine proves wrong.",
   "author": {
     "name": "GOLProductions",

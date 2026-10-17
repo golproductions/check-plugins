@@ -1,6 +1,6 @@
 {
   "name": "check",
-  "version": "5.0.1",
+  "version": "5.0.2",
   "description": "Check: before your AI runs a shell command, your own machine checks it. Stops commands your machine proves wrong.",
   "author": {
     "name": "GOLProductions",

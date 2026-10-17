@@ -1072,6 +1072,8 @@ const NOTICE = {
   credits:         () => 'Check is paused: no credit left. Top up at golproductions.com/console.',
   key_rejected:    'Check is off: this key isn\'t valid. See golproductions.com/console.',
   unreachable:     'Check: server unavailable (no connection).',
+  timeout:         'Check: server unavailable (timeout).',
+  update:          'Check is off: it needs updating. See golproductions.com/guide.',
   bad_input:       'Check: this action wasn\'t checked.',
   no_key:          'Check is off: add your GOL API Key from golproductions.com/console.',
 };
@@ -1281,6 +1283,10 @@ function runProbe(exe, args, opts) {
 
 // --- MAIN HOOK ENTRY -------------------------------------------------------
 
+// A reply that isn't JSON (a Cloudflare error page, say) reads as {}, so its
+// status code still reaches the notice instead of looking like no connection.
+async function readJson(res) { try { return await res.json(); } catch { return {}; } }
+
 function post(hookKey, payload, ms = 5000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), ms);
@@ -1303,7 +1309,7 @@ async function consult(hookKey, body, ctx, shell, cwd, preParsed = {}) {
     const payload = { ...body, parsed };
     if (probe) { payload.probe = probe; payload.probe_why = why; delete payload.probe_ok; }
     res = await post(hookKey, payload);
-    d = await res.json();
+    d = await readJson(res);
     if (!res.ok || d.verdict !== "probe") break;
     let fresh = false;
     const keys = (Array.isArray(d.probe) ? d.probe : []).filter(k => typeof k === "string" && !asked.has(k));
@@ -1327,9 +1333,11 @@ function verdictOut(f, res, d, restore = (s) => s) {
   if (!res.ok) {
     if (res.status === 429 && /spending cap/i.test(d.error || "")) { outCreditsExhausted(f, NOTICE.cap, "cap"); return; }
     if (res.status === 429 || /rate limit/i.test(d.reason || d.error || "")) { outCreditsExhausted(f, NOTICE.rate_limit, "rate_limit"); return; }
-    if (res.status >= 500) { outCreditsExhausted(f, NOTICE.server_error(res.status), "server_error"); return; }
     if (res.status === 402) { outCreditsExhausted(f, NOTICE.credits(d.daily_free || 120), "credits_exhausted"); return; }
-    outCreditsExhausted(f, NOTICE.key_rejected, "key_rejected");
+    if (res.status === 401 || res.status === 403) { outCreditsExhausted(f, NOTICE.key_rejected, "key_rejected"); return; }
+    if (res.status === 426) { outCreditsExhausted(f, NOTICE.update, "update"); return; }
+    // Any other code (5xx, a Cloudflare error, an unexpected 4xx): the code itself.
+    outCreditsExhausted(f, NOTICE.server_error(res.status), "server_error");
     return;
   }
   // Anything but a deny passes: a question left open is no verdict.
@@ -1491,12 +1499,17 @@ function routeAnswer(raw, q) {
   }
   return null;
 }
+// Why the last /route call failed: its status code, "timeout" or "net".
+let ROUTE_FAIL = null;
 async function postRoute(key, body, ms = 4000) {
   const ac = new AbortController(), t = setTimeout(() => ac.abort(), ms);
   try {
     const r = await fetch(BASE + "/route", { method: "POST", headers: { "Content-Type": "application/json", ...(key ? { "X-GOL-CLIENT-ID": key } : {}), "User-Agent": "c/" + VERSION }, body: JSON.stringify(body), signal: ac.signal });
-    return r.ok ? await r.json() : null;
-  } catch { return null; } finally { clearTimeout(t); }
+    if (!r.ok) { ROUTE_FAIL = r.status; return null; }
+    const d = await readJson(r);
+    if (!d || typeof d !== "object" || (!d.route && !Array.isArray(d.ask))) { ROUTE_FAIL = r.status; return null; }
+    return d;
+  } catch (e) { ROUTE_FAIL = e && (e.name === "AbortError" || e.name === "TimeoutError") ? "timeout" : "net"; return null; } finally { clearTimeout(t); }
 }
 // The route for this input: from the day's cache if the same questions get
 // the same answers, else from the server. null: no route (offline).
@@ -1867,7 +1880,7 @@ async function consultThin(hookKey, body, shell) {
     const payload = { ...body, answers, parsed };
     if (probe) { payload.probe = probe; payload.probe_why = why; }
     res = await post(hookKey, payload);
-    d = await res.json();
+    d = await readJson(res);
     if (!res.ok) break;
     if (d.verdict === "ask") {
       if (d.focus && typeof d.focus === "object") {
@@ -1918,7 +1931,22 @@ async function main() {
       return;
     }
     const route = await routeOf(p, key0);
-    if (!route) { process.exitCode = 0; return; }
+    if (!route) {
+      // The server couldn't be asked how to answer. Claude Code and Codex share
+      // one public hook format, so for their pre-action event Check can still
+      // say why it isn't checking; any other tool is left to run, silently.
+      const why = ROUTE_FAIL;
+      if (why && p && p.hook_event_name === "PreToolUse" && typeof p.tool_name === "string") {
+        const allow = { hookSpecificOutput: { hookEventName: "PreToolUse", permissionDecision: "allow" } };
+        REPLIES = { allow: { stdout: allow }, notice: { stdout: { ...allow, systemMessage: "$notice" } } };
+        const notice = why === "timeout" ? NOTICE.timeout : why === "net" ? NOTICE.unreachable
+          : why === 401 || why === 403 ? NOTICE.key_rejected : why === 402 ? NOTICE.credits()
+          : why === 429 ? NOTICE.rate_limit : why === 426 ? NOTICE.update : NOTICE.server_error(why);
+        outCreditsExhausted("claude", notice, why === 401 || why === 403 ? "key_rejected" : why === 402 ? "credits_exhausted" : why === 429 ? "rate_limit" : "server_error");
+        return;
+      }
+      process.exitCode = 0; return;
+    }
     const ad = applyRoute(p, route);
     FMT = f = ad.fmt;
     if (ad.pass) { out(f, true, "", true); return; }
@@ -1973,8 +2001,9 @@ async function main() {
     if (CURRENT_PROMPT) body.prompt_id = CURRENT_PROMPT.slice(0, 160);
     const { res, d } = await consultThin(hookKey, body, p.tool_name === "PowerShell" ? "powershell" : "bash");
     verdictOut(f, res, d);
-  } catch {
-    outCreditsExhausted(f, NOTICE.unreachable, "unreachable");
+  } catch (e) {
+    const timedOut = e && (e.name === "AbortError" || e.name === "TimeoutError");
+    outCreditsExhausted(f, timedOut ? NOTICE.timeout : NOTICE.unreachable, "unreachable");
   }
 }
 

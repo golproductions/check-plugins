@@ -1,6 +1,6 @@
 {
   "name": "check",
-  "version": "5.0.1",
+  "version": "5.0.2",
   "description": "Check: before Gemini CLI writes a file (or, on Linux, runs a command), your own machine checks it.",
   "settings": [
     {
