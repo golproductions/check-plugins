@@ -1,11 +1,11 @@
 {
   "name": "check",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "description": "Check: before Gemini CLI writes a file (or, on Linux, runs a command), your own machine checks it.",
   "settings": [
     {
       "name": "GOL API Key",
-      "description": "From https://golproductions.com/console (14 days free). Stored in your system keychain.",
+      "description": "From https://golproductions.com/console (100 free blocks). Stored in your system keychain.",
       "envVar": "GOL_API_KEY",
       "sensitive": true
     }

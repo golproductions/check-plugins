@@ -12,7 +12,7 @@ gemini extensions install https://github.com/golproductions/check-gemini
 
 ## What it needs
 
-A GOL API Key from https://golproductions.com/console (14 days free, no card). Gemini CLI asks for it when you install the extension and keeps it in your system keychain. Or set it once in your own terminal with `npx @golproductions/check@latest --key` (saved in `~/.check/key`). The extension reads only those two places. Your AI is never shown it.
+A GOL API Key from https://golproductions.com/console (100 free blocks, then A$0.10 only when Check stops something; no card). Gemini CLI asks for it when you install the extension and keeps it in your system keychain. Or set it once in your own terminal with `npx @golproductions/check@latest --key` (saved in `~/.check/key`). The extension reads only those two places. Your AI is never shown it.
 
 ## What it runs
 

@@ -1066,13 +1066,14 @@ function out(f, ok, reason, silent = false) {
 // One-voice fail-open messages. `check:` prefix, what's paused, what still
 // runs, one line on the fix.
 const NOTICE = {
-  rate_limit:      'check: rate limited. Verification paused; local syntax check still runs. Waits out in a minute.',
-  server_error:    (n) => 'check: verification service is down (HTTP ' + n + '). Local syntax check still runs. Resumes automatically.',
-  credits:         () => 'check: no credit left (your free trial has ended or your balance is empty), so Check is not checking. Nothing is blocked. Top up at golproductions.com/console.',
-  key_rejected:    'check: this key was not accepted. Local syntax check still runs. Fix or replace at golproductions.com/console.',
-  unreachable:     'check: verification service unreachable, command ran unverified. Resumes automatically.',
-  bad_input:       'check: hook input could not be read, so this command ran unverified. Nothing is blocked.',
-  no_key:          'check: no GOL API Key on this machine, so commands run unverified. Nothing is blocked. The person at this computer: get a key at golproductions.com/console, then add it in the settings of your Check plugin, or with the Check installer (golproductions.com/guide).',
+  rate_limit:      'Check: server unavailable (429).',
+  cap:             'Check is paused: today\'s spending limit is reached.',
+  server_error:    (n) => 'Check: server unavailable (' + n + ').',
+  credits:         () => 'Check is paused: no credit left. Top up at golproductions.com/console.',
+  key_rejected:    'Check is off: this key isn\'t valid. See golproductions.com/console.',
+  unreachable:     'Check: server unavailable (no connection).',
+  bad_input:       'Check: this action wasn\'t checked.',
+  no_key:          'Check is off: add your GOL API Key from golproductions.com/console.',
 };
 
 // Billing / traffic state: warn once per day per category, then let the
@@ -1324,6 +1325,7 @@ async function consult(hookKey, body, ctx, shell, cwd, preParsed = {}) {
 
 function verdictOut(f, res, d, restore = (s) => s) {
   if (!res.ok) {
+    if (res.status === 429 && /spending cap/i.test(d.error || "")) { outCreditsExhausted(f, NOTICE.cap, "cap"); return; }
     if (res.status === 429 || /rate limit/i.test(d.reason || d.error || "")) { outCreditsExhausted(f, NOTICE.rate_limit, "rate_limit"); return; }
     if (res.status >= 500) { outCreditsExhausted(f, NOTICE.server_error(res.status), "server_error"); return; }
     if (res.status === 402) { outCreditsExhausted(f, NOTICE.credits(d.daily_free || 120), "credits_exhausted"); return; }
@@ -1332,7 +1334,7 @@ function verdictOut(f, res, d, restore = (s) => s) {
   }
   // Anything but a deny passes: a question left open is no verdict.
   if (d.verdict !== "invalid") { out(f, true); return; }
-  out(f, false, restore(d.reason || "check: server returned a deny with no reason attached. Report at golproductions.com/console if this persists."));
+  out(f, false, restore(d.reason || "This action would fail."));
 }
 
 // --- TURNS AND HELPERS ------------------------------------------------------
@@ -1600,8 +1602,7 @@ function onStop(p) {
   process.exitCode = 0;
   try {
     if (p.stop_hook_active) return;
-    const msg = receiptFor(p.prompt_id);
-    if (msg) process.stdout.write(JSON.stringify({ systemMessage: msg }));
+    receiptFor(p.prompt_id);   // tidies the message's record; Check prints nothing at the end of a reply
   } catch {}
 }
 

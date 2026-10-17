@@ -10,7 +10,7 @@ Check by GOLProductions: before your AI acts, your own machine checks the action
 | Cursor | [plugins/cursor](plugins/cursor) |
 | Gemini CLI | [golproductions/check-gemini](https://github.com/golproductions/check-gemini) (the same files as [plugins/gemini](plugins/gemini)) |
 
-Each package carries the Check client itself, plain readable JavaScript, and downloads nothing. A GOL API Key comes from https://golproductions.com/console (14 days free).
+Each package carries the Check client itself, plain readable JavaScript, and downloads nothing. A GOL API Key comes from https://golproductions.com/console (100 free blocks).
 
 Any other agent, or all of them at once: `npx @golproductions/check@latest --install`. See https://golproductions.com/guide
 

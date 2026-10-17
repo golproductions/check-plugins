@@ -10,7 +10,7 @@ In Codex, add the marketplace `golproductions/check-plugins` and install **check
 
 ## What it needs
 
-A GOL API Key from https://golproductions.com/console (14 days free, no card). Set it once in your own terminal (not through your AI): `npx @golproductions/check@latest --key`. It is saved in `~/.check/key`, and this plugin reads it only from there. Your AI is never shown it.
+A GOL API Key from https://golproductions.com/console (100 free blocks, then A$0.10 only when Check stops something; no card). Set it once in your own terminal (not through your AI): `npx @golproductions/check@latest --key`. It is saved in `~/.check/key`, and this plugin reads it only from there. Your AI is never shown it.
 
 ## What it runs
 
